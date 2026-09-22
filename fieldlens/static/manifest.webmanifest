@@ -1,0 +1,19 @@
+{
+  "name": "FieldLens",
+  "short_name": "FieldLens",
+  "description": "Offline-first field capture: on-device extraction, local queue, direct phone-to-PC sync.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1418",
+  "theme_color": "#101820",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

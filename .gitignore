@@ -1,0 +1,21 @@
+# Runtime state
+*.db
+*.db-journal
+*.db-wal
+inbox/
+*.officekit.json
+*.officekit.json.applied
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
