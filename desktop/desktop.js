@@ -13,7 +13,20 @@
  * writes a row into the ERP on its own.
  */
 
-const DEFAULT_BASE = /^https?:$/.test(location.protocol) ? location.origin : "http://127.0.0.1:12000";
+/**
+ * The inbox is a process on the worker's own machine, so loopback is the only
+ * honest default. Trusting location.origin would make a copy of this shell
+ * served from anywhere else (a static host, a shared drive) poll that origin
+ * forever and report a missing /api/queue as though the office machine were at
+ * fault. The origin is used only when this page is itself being served from
+ * loopback; otherwise the worker is pointed at their own machine, and the base
+ * field below lets them override it. Browsers treat http://127.0.0.1 as a
+ * trustworthy origin, so this still works from an https page.
+ */
+const LOOPBACK = /^(127\.0\.0\.1|localhost|\[::1\])$/i;
+const DEFAULT_BASE = LOOPBACK.test(location.hostname)
+  ? `${location.protocol}//${location.host}`
+  : "http://127.0.0.1:12000";
 
 const state = {
   base: DEFAULT_BASE,
@@ -56,8 +69,20 @@ async function poll() {
     applyFlow(flow);
     setStatus(`Watching ${state.base} · checked every ${POLL_MS / 1000}s`, "ok");
   } catch (err) {
-    setStatus(`Cannot reach the FieldLens inbox at ${state.base}: ${err.message}`, "error");
+    setStatus(`Cannot reach the FieldLens inbox at ${state.base}: ${err.message} (${baseHint()})`, "error");
   }
+}
+
+function baseHint() {
+  let host;
+  try {
+    host = new URL(state.base).hostname;
+  } catch {
+    return "that is not a valid address - enter host:port for the machine running the server";
+  }
+  return LOOPBACK.test(host)
+    ? "is the FieldLens server running on this machine?"
+    : "no FieldLens inbox answers there - check the Inbox field is your own machine, not this page's address";
 }
 
 function applyFlow(flow) {
