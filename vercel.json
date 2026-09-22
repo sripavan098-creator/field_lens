@@ -5,6 +5,18 @@
     { "src": "/tests/(.*)", "status": 404 },
     { "src": "/(\\.gitignore|README\\.md)$", "status": 404 },
     { "src": "/(\\.git|node_modules)/(.*)", "status": 404 },
-    { "src": "/", "dest": "/fieldlens/static/index.html" }
+
+    { "src": "/", "dest": "/fieldlens/static/index.html" },
+    { "src": "/index.html", "dest": "/fieldlens/static/index.html" },
+    { "src": "/app.js", "dest": "/fieldlens/static/app.js" },
+    { "src": "/engine.js", "dest": "/fieldlens/static/engine.js" },
+    { "src": "/store.js", "dest": "/fieldlens/static/store.js" },
+    { "src": "/transfer.js", "dest": "/fieldlens/static/transfer.js" },
+    { "src": "/styles.css", "dest": "/fieldlens/static/styles.css" },
+    { "src": "/sw.js", "dest": "/fieldlens/static/sw.js" },
+    { "src": "/icon.svg", "dest": "/fieldlens/static/icon.svg" },
+    { "src": "/manifest.webmanifest", "dest": "/fieldlens/static/manifest.webmanifest" },
+
+    { "handle": "filesystem" }
   ]
 }
