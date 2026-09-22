@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#101820" />
+<title>FieldLens · offline field capture</title>
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body data-busy="0">
+
+<header class="topbar">
+  <div class="brand">
+    <span class="mark">FL</span>
+    <div>
+      <h1>FieldLens</h1>
+      <p>Zero-connectivity field automator</p>
+    </div>
+  </div>
+  <dl class="device">
+    <div><dt>Device</dt><dd id="device-id">…</dd></div>
+    <div><dt>Protocol</dt><dd id="protocol">officekit/1</dd></div>
+  </dl>
+</header>
+
+<p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-view="capture" aria-selected="true">Capture</button>
+  <button role="tab" data-view="queue" aria-selected="false">Queue <span id="depth-total" class="badge">0</span></button>
+  <button role="tab" data-view="sync" aria-selected="false">Office Kit sync</button>
+</nav>
+
+<main>
+
+  <!-- 1. Multimodal capture -->
+  <section data-panel="capture">
+    <p class="lede">
+      Camera and microphone are one control. Hold the shutter, speak what you are looking at,
+      release. The frame and the words become a single record before anything is written.
+    </p>
+
+    <div class="capture">
+      <div class="viewport">
+        <video id="preview" playsinline muted></video>
+        <div class="overlay"><span id="shutter-hint">Hold to capture</span></div>
+      </div>
+      <div class="capture-controls">
+        <button id="shutter" class="shutter" aria-label="Hold to capture photo and narration">
+          <span class="ring"></span><span class="dot"></span>
+        </button>
+        <p class="shutter-help">Press and hold. Release to extract.</p>
+      </div>
+    </div>
+
+    <div class="grid two">
+      <label class="field">
+        <span class="k">Capture profile</span>
+        <select id="kind"></select>
+        <small id="profile-hint"></small>
+      </label>
+      <label class="field">
+        <span class="k">Narration (live transcription, editable)</span>
+        <textarea id="narration" rows="4" placeholder="e.g. corroded flange on pump P-114 near the north wall, severity high, reinspect in 30 days"></textarea>
+        <small id="engine-note"></small>
+      </label>
+      <label class="field">
+        <span class="k">Site</span>
+        <input id="site" placeholder="Depot 4 / Chainage 12+300" />
+      </label>
+      <label class="field">
+        <span class="k">Operator</span>
+        <input id="operator" placeholder="Name or staff id" />
+      </label>
+    </div>
+
+    <div id="draft-preview" class="panel" hidden></div>
+
+    <div class="panel">
+      <h2>Extraction contract for this profile</h2>
+      <p class="meta">
+        These are the fields the on-device model is constrained to emit. The same list is the
+        JSON schema the desktop inbox validates against, so a prototype in the lab is the schema
+        that ships on the phone.
+      </p>
+      <ul id="field-preview" class="field-preview"></ul>
+    </div>
+  </section>
+
+  <!-- 3. Local smart sync queue -->
+  <section data-panel="queue" hidden>
+    <p class="lede">
+      Everything here was written with the radio off. Nothing is sent until you have looked at it.
+      Ready: <strong id="queue-ready-count">0</strong>.
+    </p>
+    <div class="depth">
+      <div><dt>Ready to send</dt><dd id="depth-ready">0</dd></div>
+      <div><dt>Needs review</dt><dd id="depth-review">0</dd></div>
+      <div><dt>Stuck / conflict</dt><dd id="depth-stuck">0</dd></div>
+    </div>
+
+    <div class="filters">
+      <label class="field"><span class="k">Profile</span>
+        <select id="queue-filter-kind" onchange="void 0">
+          <option value="">All profiles</option>
+          <option value="invoice">Invoice / delivery note</option>
+          <option value="inspection">Infrastructure inspection</option>
+          <option value="inventory">Warehouse shelf</option>
+        </select>
+      </label>
+      <label class="field"><span class="k">Status</span>
+        <select id="queue-filter-status">
+          <option value="">Any status</option>
+          <option value="draft">Draft</option>
+          <option value="needs_review">Needs review</option>
+          <option value="verified">Verified</option>
+          <option value="queued">Queued</option>
+          <option value="acked">On desktop</option>
+          <option value="conflict">Conflict</option>
+          <option value="failed">Failed</option>
+        </select>
+      </label>
+      <button id="clear-acked" class="ghost">Clear delivered records + evidence</button>
+    </div>
+
+    <table class="queue">
+      <thead>
+        <tr><th>Id</th><th>Profile</th><th>Status</th><th>Confidence</th><th>Extracted</th><th></th></tr>
+      </thead>
+      <tbody id="queue-body"></tbody>
+    </table>
+    <p id="queue-empty" class="meta" hidden>No records match this filter.</p>
+
+    <div id="record-detail" class="panel" hidden></div>
+  </section>
+
+  <!-- 4. Office Kit desktop sync -->
+  <section data-panel="sync" hidden>
+    <p class="lede">
+      Office Kit moves data phone-to-PC over the local link only: office Wi-Fi, a USB tether, or a
+      hotspot with no uplink. No cloud relay, no account, no DNS.
+    </p>
+
+    <div class="grid two">
+      <label class="field">
+        <span class="k">Desktop target (host:port)</span>
+        <input id="target" value="127.0.0.1:12000" inputmode="url" />
+        <small id="target-hint">No target set.</small>
+      </label>
+      <div class="actions">
+        <button id="probe-now">Probe link</button>
+        <button id="pair-now">Claim pairing code</button>
+      </div>
+      <label class="field">
+        <span class="k">Transfer note (optional, for the office)</span>
+        <input id="sync-note" placeholder="Morning round, Depot 4" />
+      </label>
+      <div class="actions">
+        <button id="sync-now" class="primary">Sync verified records now</button>
+        <button id="export-now" class="ghost">Export portable bundle instead</button>
+      </div>
+    </div>
+
+    <p id="pairing-state" class="meta"></p>
+    <p id="send-set" class="meta"></p>
+
+    <div class="panel">
+      <h2>Extraction engine on this device</h2>
+      <p class="meta">
+        The app prefers Phi-3-Vision on the NPU. If this webview cannot host those weights it says
+        so and falls back to the deterministic rules extractor rather than showing invented values.
+      </p>
+      <ul id="engine-attempts" class="attempts"></ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    FieldLens never writes to the network. Everything above runs on this device; the only outbound
+    call is the Office Kit transfer to a machine on your own local network.
+  </p>
+</footer>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>

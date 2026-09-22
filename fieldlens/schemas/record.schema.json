@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldlens.local/schemas/record.schema.json",
+  "title": "FieldLens Record",
+  "description": "One offline capture: merged visual evidence + spoken narration, resolved by the on-device VLM into a structured ERP-ready row, with all raw evidence retained.",
+  "type": "object",
+  "required": ["id", "kind", "capturedAt", "capture", "evidence", "extraction", "sync", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "kind": {
+      "type": "string",
+      "enum": ["invoice", "inspection", "inventory"],
+      "description": "Extraction profile selected before capture."
+    },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "capture": {
+      "type": "object",
+      "description": "The operator-authored part of the record. Local only, never inferred.",
+      "required": ["narration", "site"],
+      "additionalProperties": false,
+      "properties": {
+        "narration": { "type": "string", "description": "Speech-to-text of what the worker said while shooting." },
+        "site": { "type": "string" },
+        "operator": { "type": "string" },
+        "geo": {
+          "type": ["object", "null"],
+          "required": ["lat", "lon"],
+          "additionalProperties": false,
+          "properties": { "lat": { "type": "number" }, "lon": { "type": "number" } }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Raw bytes retained so any extracted field can be traced back to what the camera saw and the mic heard.",
+      "required": ["photoCount", "audioMs"],
+      "additionalProperties": false,
+      "properties": {
+        "photoCount": { "type": "integer", "minimum": 1 },
+        "audioMs": { "type": "integer", "minimum": 0 },
+        "sha256": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "extraction": {
+      "type": "object",
+      "required": ["fields", "confidence", "engine", "needsReview"],
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "null"] }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "engine": { "type": "string", "description": "Which engine produced this row, e.g. phi-3-vision-int4:npu or fieldlens-rules:v1." },
+        "needsReview": { "type": "boolean", "description": "True when confidence < 0.75 or a required field is null." },
+        "fieldSources": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["visual", "audio", "fused", "inferred"]
+          }
+        }
+      }
+    },
+    "sync": {
+      "type": "object",
+      "required": ["status", "attempts", "idempotencyKey"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["draft", "needs_review", "verified", "queued", "transferring", "acked", "conflict", "failed"]
+        },
+        "attempts": { "type": "integer", "minimum": 0 },
+        "idempotencyKey": { "type": "string" },
+        "lastError": { "type": ["string", "null"] },
+        "ackedAt": { "type": ["string", "null"], "format": "date-time" },
+        "batchId": { "type": ["string", "null"] }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["deviceId", "appVersion", "createdOffline", "clockSkewRisk"],
+      "additionalProperties": false,
+      "properties": {
+        "deviceId": { "type": "string" },
+        "appVersion": { "type": "string" },
+        "createdOffline": { "type": "boolean", "const": true, "description": "A field record is always authored with the radio off." },
+        "clockSkewRisk": { "type": "boolean" }
+      }
+    },
+    "narrative": {
+      "type": ["string", "null"],
+      "description": "Free-form VLM summary of the scene, kept for human review. Never used as an ERP field."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FieldLens">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#47d1a0"/>
+      <stop offset="1" stop-color="#6cb8ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0d1418"/>
+  <circle cx="256" cy="248" r="150" fill="none" stroke="url(#g)" stroke-width="26"/>
+  <circle cx="256" cy="248" r="74" fill="url(#g)"/>
+  <rect x="330" y="300" width="140" height="34" rx="17" transform="rotate(45 330 300)" fill="url(#g)"/>
+</svg>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FieldLens desktop · Flow State Guardian</title>
+<link rel="stylesheet" href="./desktop.css" />
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="mark">FL</span>
+    <div>
+      <h1>Flow State Guardian</h1>
+      <p>Resumes your desktop work the moment an Office Kit transfer lands</p>
+    </div>
+  </div>
+  <div class="controls">
+    <label>
+      <span>Inbox</span>
+      <input id="base" value="" placeholder="http://127.0.0.1:12000" />
+    </label>
+    <button id="refresh">Check now</button>
+  </div>
+</header>
+
+<p id="status" class="status" data-tone="idle">Starting…</p>
+
+<main>
+  <section id="handover" class="banner handover" hidden>
+    <div>
+      <h2 id="handover-title"></h2>
+      <p id="handover-detail" class="meta"></p>
+    </div>
+    <button id="dismiss-handover" class="ghost">Dismiss</button>
+  </section>
+
+  <section id="resume-banner" class="banner resume" hidden>
+    <div>
+      <h2>Welcome back</h2>
+      <p id="resume-detail" class="meta"></p>
+    </div>
+    <button id="dismiss-resume" class="ghost">Dismiss</button>
+  </section>
+
+  <p id="empty" class="empty">
+    Nothing has arrived yet. Capture on the phone, verify in the queue, then run an Office Kit
+    sync while connected to this machine's network. This page polls the inbox and will take over
+    the moment a bundle lands.
+  </p>
+
+  <section class="layout">
+    <article class="card active">
+      <header class="card-head">
+        <h2>Resume here</h2>
+        <span class="hint">The record you were last on</span>
+      </header>
+      <div id="active"></div>
+    </article>
+
+    <aside class="card">
+      <header class="card-head">
+        <h2>Continue with</h2>
+        <span class="badge"><span id="continuation-count">0</span> in this batch</span>
+      </header>
+      <ul id="continuation" class="rows"></ul>
+      <p class="meta">Clicking one makes it the active record on this desktop, so closing the laptop and reopening it resumes the same place.</p>
+    </aside>
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>Held back from the ERP</h2>
+      <span class="badge warn"><span id="review-count">0</span> flagged</span>
+    </header>
+    <ul id="review-list" class="rows"></ul>
+    <p class="meta">
+      Low-confidence or incomplete records land here instead of in the ERP. A field worker can
+      correct them in the queue on the phone and re-sync.
+    </p>
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>Transfer log</h2>
+    </header>
+    <p id="transfer-meta" class="meta"></p>
+    <p class="meta mono" id="base-url"></p>
+  </section>
+</main>
+
+<footer>
+  <p>
+    This shell reads the FieldLens inbox over the loopback interface only. It never writes a row
+    into the ERP on its own, and it makes no outbound network call.
+  </p>
+</footer>
+
+<script type="module" src="./desktop.js"></script>
+</body>
+</html>
