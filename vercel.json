@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    { "src": "/(.*)\\.py$", "status": 404 },
+    { "src": "/tests/(.*)", "status": 404 },
+    { "src": "/(\\.gitignore|README\\.md)$", "status": 404 },
+    { "src": "/(\\.git|node_modules)/(.*)", "status": 404 },
+    { "src": "/", "dest": "/fieldlens/static/index.html" }
+  ]
+}
